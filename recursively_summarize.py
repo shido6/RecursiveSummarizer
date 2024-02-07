@@ -1,17 +1,17 @@
-import openai
+from openai import OpenAI
+
 import os
 from time import time,sleep
 import textwrap
 import re
 
+client = OpenAI(
+  api_key=os.getenv('OPENAI_API_KEY'),
+)
 
 def open_file(filepath):
     with open(filepath, 'r', encoding='utf-8') as infile:
         return infile.read()
-
-
-openai.api_key = open_file('openaiapikey.txt')
-
 
 def save_file(content, filepath):
     with open(filepath, 'w', encoding='utf-8') as outfile:
@@ -23,16 +23,15 @@ def gpt3_completion(prompt, engine='text-davinci-002', temp=0.6, top_p=1.0, toke
     retry = 0
     while True:
         try:
-            response = openai.Completion.create(
-                engine=engine,
-                prompt=prompt,
-                temperature=temp,
-                max_tokens=tokens,
-                top_p=top_p,
-                frequency_penalty=freq_pen,
-                presence_penalty=pres_pen,
-                stop=stop)
-            text = response['choices'][0]['text'].strip()
+            response = client.completions.create(engine=engine,
+            prompt=prompt,
+            temperature=temp,
+            max_tokens=tokens,
+            top_p=top_p,
+            frequency_penalty=freq_pen,
+            presence_penalty=pres_pen,
+            stop=stop)
+            text = response.choices[0].text.strip()
             text = re.sub('\s+', ' ', text)
             filename = '%s_gpt3.txt' % time()
             with open('gpt3_logs/%s' % filename, 'w') as outfile:
